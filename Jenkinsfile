@@ -9,14 +9,14 @@ pipeline {
 
         stage('Clean Workspace') {
             steps {
-                echo "Cleaning Jenkins Workspace..."
+                echo "🧹 Cleaning Jenkins Workspace..."
                 deleteDir()
             }
         }
 
         stage('Clone Repository') {
             steps {
-                echo "Cloning GitHub Repository..."
+                echo "📦 Cloning GitHub Repository..."
                 git branch: 'main',
                     url: 'https://github.com/lallanborasi12/jenkinstest.git',
                     credentialsId: 'github-token'
@@ -25,7 +25,7 @@ pipeline {
 
         stage('Setup Node.js') {
             steps {
-                echo "Installing Node.js if not installed..."
+                echo "⚙️ Installing Node.js if not installed..."
                 sh '''
                 if ! command -v node &> /dev/null
                 then
@@ -41,7 +41,7 @@ pipeline {
 
         stage('Install Dependencies & Build') {
             steps {
-                echo "Installing dependencies and building project..."
+                echo "📦 Installing dependencies and building project..."
                 sh '''
                 npm cache clean --force
                 rm -rf node_modules package-lock.json
@@ -54,7 +54,7 @@ pipeline {
 
         stage('Deploy with PM2') {
             steps {
-                echo "Deploying React App using PM2..."
+                echo "🚀 Deploying React App using PM2..."
                 sh '''
                 sudo npm install -g pm2
                 pm2 delete all || true
@@ -64,15 +64,26 @@ pipeline {
                 '''
             }
         }
+
+        stage('Deploy to /var/www/html') {
+            steps {
+                echo "📂 Deploying build to /var/www/html..."
+                sh '''
+                sudo rm -rf /var/www/html/*
+                sudo cp -r build/* /var/www/html/
+                sudo chmod -R 755 /var/www/html
+                echo "✅ Deployment Complete! App available at /var/www/html"
+                '''
+            }
+        }
     }
-      
-    
+
     post {
         success {
-            echo "✅ Deployment Successful!"
+            echo "🎉 Deployment Successful!"
         }
         failure {
-            echo "❌ Build Failed. Check console logs."
+            echo "❌ Build Failed. Please check the logs."
         }
     }
 }
