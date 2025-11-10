@@ -64,7 +64,7 @@ pipeline {
                 echo "📂 Deploying build to /var/www/html..."
                 sh '''
                 sudo rm -rf /var/www/html/*
-                sudo cp -r /project/* /var/www/html/
+                sudo cp -r build/* /var/www/html/
                 sudo chmod -R 755 /var/www/html
                 echo "✅ Deployment Complete! App available at /var/www/html"
                 '''
