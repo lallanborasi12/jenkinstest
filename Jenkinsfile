@@ -1,55 +1,77 @@
 pipeline {
     agent any
 
+    environment {
+        NODE_VERSION = "18.19.1"
+    }
+
     stages {
+
         stage('Clean Workspace') {
             steps {
-                echo 'Cleaning Jenkins Workspace'
+                echo "Cleaning Jenkins Workspace..."
                 deleteDir()
             }
         }
 
-        stage('Clone Repo') {
+        stage('Clone Repository') {
             steps {
-                echo 'Cloning Repository...'
-                git branch: 'main', url: 'https://github.com/lallanborasi12/jenkinstest.git'
+                echo "Cloning GitHub Repository..."
+                git branch: 'main',
+                    url: 'https://github.com/lallanborasi12/jenkinstest.git',
+                    credentialsId: 'github-token'
+            }
+        }
+
+        stage('Setup Node.js') {
+            steps {
+                echo "Installing Node.js if not installed..."
+                sh '''
+                if ! command -v node &> /dev/null
+                then
+                  echo "Node.js not found. Installing..."
+                  curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+                  sudo apt-get install -y nodejs
+                fi
+                node -v
+                npm -v
+                '''
             }
         }
 
         stage('Install Dependencies & Build') {
             steps {
-                echo 'Installing dependencies and building...'
+                echo "Installing dependencies and building project..."
                 sh '''
-                    cd $WORKSPACE
-                    npm install
-                    npm run build
+                npm cache clean --force
+                rm -rf node_modules package-lock.json
+                npm install
+                npm install react-scripts --save
+                npm run build
                 '''
             }
         }
 
         stage('Deploy with PM2') {
             steps {
-                echo 'Deploying app using PM2...'
+                echo "Deploying React App using PM2..."
                 sh '''
-                    APP_DIR=/var/www/html4/reactjs-app
-
-                    # Copy build files to deployment directory
-                    sudo mkdir -p $APP_DIR
-                    sudo rsync -av --delete --exclude=.git --exclude=node_modules ./ $APP_DIR
-
-                    cd $APP_DIR
-
-                    # Ensure dependencies
-                    npm install
-
-                    # Start with PM2 (replace if already running)
-                    
-                  
-
-                    # Save PM2 process list and enable on reboot
-                    
+                sudo npm install -g pm2
+                pm2 delete all || true
+                pm2 serve build 3000 --spa --name "react-app"
+                pm2 save
+                pm2 list
                 '''
             }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Deployment Successful!"
+        }
+        failure {
+            echo "❌ Build Failed. Check console logs."
         }
     }
 }
