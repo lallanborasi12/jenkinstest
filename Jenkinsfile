@@ -65,19 +65,7 @@ pipeline {
             }
         }
     }
-       stage('Deploy to /var/www/html') {
-            steps {
-                echo "🚀 Deploying build to /var/www/html..."
-                // Copy the React build output to Apache web root
-                sh '''
-                sudo rm -rf /var/www/html/*
-                sudo cp -r build/* /var/www/html/
-                sudo chmod -R 755 /var/www/html
-                echo "✅ Deployment Complete! Your app is live."
-                '''
-            }
-        }
-    }
+      
     
     post {
         success {
