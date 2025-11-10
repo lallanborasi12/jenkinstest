@@ -25,14 +25,8 @@ pipeline {
 
         stage('Setup Node.js') {
             steps {
-                echo "⚙️ Installing Node.js if not installed..."
+                echo "⚙️ Checking Node.js and npm versions..."
                 sh '''
-                if ! command -v node &> /dev/null
-                then
-                  echo "Node.js not found. Installing..."
-                  curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-                  sudo apt-get install -y nodejs
-                fi
                 node -v
                 npm -v
                 '''
@@ -70,7 +64,7 @@ pipeline {
                 echo "📂 Deploying build to /var/www/html..."
                 sh '''
                 sudo rm -rf /var/www/html/*
-                sudo cp -r build/* /var/www/html/
+                sudo cp -r build /var/www/html/
                 sudo chmod -R 755 /var/www/html
                 echo "✅ Deployment Complete! App available at /var/www/html"
                 '''
