@@ -12,7 +12,7 @@ pipeline {
         stage('Clone Repo') {
             steps {
                 echo 'Cloning Repository...'
-                git branch: 'master', url: 'https://github.com/lallanborasi12/jenkinstest.git'
+                git branch: 'main', url: 'https://github.com/lallanborasi12/jenkinstest.git'
             }
         }
 
